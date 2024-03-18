@@ -28,4 +28,7 @@ step 3 - perform the rest of the steps same.
 
 
 If asked, you may also include any plots or figures in this notebook as well:
-samples/INPsbsample_rep2.fastq.gz samples/RUNX1subsample_rep1.fastq.gz samples/RUNX1subsample_rep2.fastq.gz
+https://scc-ondemand2.bu.edu/pun/sys/dashboard/files/fs//projectnb/bf528/students/arshiyas/project-2-sarshiya/results/INPsubsample_rep1_fastqc.html
+https://scc-ondemand2.bu.edu/pun/sys/dashboard/files/fs//projectnb/bf528/students/arshiyas/project-2-sarshiya/results/INPsubsample_rep2_fastqc.html
+https://scc-ondemand2.bu.edu/pun/sys/dashboard/files/fs//projectnb/bf528/students/arshiyas/project-2-sarshiya/results/RUNX1subsample_rep1_fastqc.html
+https://scc-ondemand2.bu.edu/pun/sys/dashboard/files/fs//projectnb/bf528/students/arshiyas/project-2-sarshiya/results/RUNX1subsample_rep2_fastqc.html
