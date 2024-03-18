@@ -8,7 +8,8 @@ rule all:
 	input:
 		expand('results/{condition}_{rep}_fastqc.html', condition=CONDITIONS, rep=REPS),
 		expand('results/{condition}_{rep}.trimmed.fastq.gz', condition=CONDITIONS, rep=REPS),
-		'results/bowtie2_index'
+		'results/human_genome_index'
+		
 
 rule wget_files:
 	output:
@@ -25,14 +26,16 @@ rule bowtie2_build_gencode:
 	input:
 		'results/GRCh38.primary_assembly.genome.fa.gz'
 	output:
-		'results/bowtie2_index'
+		directory('results/human_genome_index')
 	params:
 		threads=16
 	conda:
 		'envs/bowtie2_env.yml'
 	shell:
 		"""
-		bowtie2-build -f -q {input} {output}
+		mkdir -p {output}
+        bowtie2-build --threads {params.threads} {input} {output}/genome_index
+        touch {output}/genome_index.*
 		"""
 
 rule fastqc:
