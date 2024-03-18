@@ -28,4 +28,4 @@ step 3 - perform the rest of the steps same.
 
 
 If asked, you may also include any plots or figures in this notebook as well:
-
+samples/INPsbsample_rep2.fastq.gz samples/RUNX1subsample_rep1.fastq.gz samples/RUNX1subsample_rep2.fastq.gz
