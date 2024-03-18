@@ -5,7 +5,23 @@ date: '2024-03-01'
 ---
 
 Use this notebook to quickly write the methods for the week:
+For the subsampled file:-
+STEP 1 - setting up conda environment
+step 2 - downloading subsampled files from the link provided in the sample_sheet.csv using rule wget and fastq.gz file created
+    samples/INPsubsample_rep1.fastq.gz, samples/INPsubsample_rep2.fastq.gz, samples/RUNX1subsample_rep1.fastq.gz, samples/RUNX1subsample_rep2.fastq.gz
+step 3- taking fastq.gz file and doing fastqc using fastqc
+    files formed - results results/INPsubsample_rep1_fastqc.html, results/INPsubsample_rep1_fastqc.zip,
+    results/INPsubsample_rep2_fastqc.html,results/INPsubsample_rep2_fastqc.zip, 
+    results/RUNX1subsample_rep1_fastqc.html, results/RUNX1subsample_rep1_fastqc.zip
+    results/RUNX1subsample_rep2_fastqc.html, results/RUNX1subsample_rep2_fastqc.zip
+step 4 - taking the same fastq.gz file and trimming the ends using trimmomatic
+    results/INPsubsample_rep1.trimmed.fastq.gz,results/INPsubsample_rep2.trimmed.fastq.gz, results/RUNX1subsample_rep1.trimmed.fastq.gz, results/RUNX1subsample_rep2.trimmed.fastq.gz
+step 5 - creating the index file with the help of human reference genome GRCh38.primary_assembly.genome.fa.gz
 
+FOR the sample files:-
+step 1 - download the full data from the embl 
+step 2 - make changes in the sample_sheet.csv for the full data sample files
+step 3 - perform the rest of the steps same.
 
 
 

@@ -6,7 +6,9 @@ REPS = set(sample_csv['replicate'].tolist())
 
 rule all:
 	input:
-		expand('results/{condition}_{rep}.fastqc.zip', condition=CONDITIONS, rep=REPS)
+		expand('results/{condition}_{rep}_fastqc.html', condition=CONDITIONS, rep=REPS),
+		expand('results/{condition}_{rep}.trimmed.fastq.gz', condition=CONDITIONS, rep=REPS),
+		'results/bowtie2_index'
 
 rule wget_files:
 	output:
@@ -30,31 +32,31 @@ rule bowtie2_build_gencode:
 		'envs/bowtie2_env.yml'
 	shell:
 		"""
-		bowtie2-build --threads {params.threads} {input} {output}
+		bowtie2-build -f -q {input} {output}
 		"""
 
 rule fastqc:
 	input:
-		 expand('samples/{condition}_{rep}.fastq.gz', condition=CONDITIONS, rep=REPS)
+		expand('samples/{condition}_{rep}.fastq.gz', condition=CONDITIONS, rep=REPS)
 	output:
-		'results/{condition}_{rep}.fastqc.zip'
+		expand('results/{condition}_{rep}_fastqc.html', condition=CONDITIONS, rep=REPS),
+		expand('results/{condition}_{rep}_fastqc.zip', condition=CONDITIONS, rep=REPS)
 	params:
-		threads=4
+		outdir = 'results/'
 	conda:
 		'envs/fastqc_env.yml'
 	shell:
 		"""
-		fastqc -t {params.threads} -o results {input}
+		fastqc {input} -o {params.outdir}
 		"""
 
-rule trimomatic:
+rule trimmomatic:
 	input:
 		"samples/{condition}_{rep}.fastq.gz"
 	output:
 		"results/{condition}_{rep}.trimmed.fastq.gz"
 	params :
-		adapters="results/TruSeq3-SE.fa",
-		threads=8
+		adapters="results/TruSeq3-SE.fa"
 	conda:
 		'envs/trimmomatic_env.yml'
 	shell:
