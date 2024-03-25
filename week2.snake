@@ -1,34 +1,35 @@
-CONDITIONS =['INPsample', 'RUNX1sample', 'INPsample', 'RUNX1sample']
+import pandas
 
-REPS = ['rep1', 'rep2']
-
+sample_csv = pandas.read_csv('sample_sheet.csv', index_col='name')
+CONDITIONS = set(sample_csv['condition'].tolist())
+REPS = set(sample_csv['replicate'].tolist())
 
 rule all:
 	input:
 		expand("results/{condition}_{rep}.bam", condition = CONDITIONS, rep = REPS),
 		expand("results/{condition}_{rep}.sorted.bam", condition=CONDITIONS, rep=REPS),
 		expand("results/{condition}_{rep}.sorted.bam.bai", condition=CONDITIONS, rep=REPS),
-		expand("results/{condition}_{rep}.flagstat", condition=CONDITIONS, rep=REPS),
+		expand("results/{condition}_{rep}.flagstat.txt", condition=CONDITIONS, rep=REPS),
 		expand("results/{condition}_{rep}.bw", condition=CONDITIONS, rep=REPS),
 		"results/multiBigWigSummary_results.npz",
 		"results/multiqc_report.html",
-		"results/plotCorrelation.png"
+		"results/plotCorrelation_heatmap.png"
 
 rule bowtie2_align:
-	input:
-		fastq = "results/{condition}_{rep}.trimmed.fastq.gz",
-		index= "results/human_genome_index/genome_index.1.bt2", 
-	output:
-		bam="results/{condition}_{rep}.bam"
-	threads:16
-	params:
-		dir = "results/human_genome_index/genome_index"
-	conda:
-		'envs/bowtie2_env.yml'
-	shell:
-		"""
-		bowtie2 -x {params.dir} -U {input.fastq} | samtools view -bS - > {output.bam}
-		"""
+    input:
+        index="results/human_genome_index/genome_index.1.bt2",
+        trimmed_fastq="results/{condition}_{rep}.trimmed.fastq.gz"
+    output:
+        bam="results/{condition}_{rep}.bam"
+    threads: 16
+    params:
+        dir = "results/human_genome_index/genome_index"
+    conda:
+        'envs/bowtie2_env.yml'
+    shell:
+        """
+        bowtie2 -x {params.dir} -U {input.trimmed_fastq} | samtools view -bS - > {output.bam}
+        """
 
 rule samtools_sort:
 	input:
@@ -57,7 +58,7 @@ rule flagstats:
 	input:
 		bam="results/{condition}_{rep}.sorted.bam"
 	output:
-		flagstat="results/{condition}_{rep}.flagstat"
+		flagstat="results/{condition}_{rep}.flagstat.txt"
 	conda:
 		'envs/samtools_env.yml'
 	shell:
@@ -67,15 +68,14 @@ rule flagstats:
 
 rule multiqc:
 	input:
-		expand("results/{condition}_{rep}.flagstat", condition=CONDITIONS, rep=REPS)
+		multiqc = expand("results/{condition}_{rep}.flagstat.txt", condition=CONDITIONS, rep=REPS)
 	output:
 		html="results/multiqc_report.html"
-	params:
 	conda:
 		'envs/multiqc_env.yml'
 	shell:
 		"""
-		multiqc results/
+		 multiqc -o results/ {input.multiqc}
 		"""
 
 rule bamCoverage:
@@ -88,7 +88,7 @@ rule bamCoverage:
 		'envs/deeptools_env.yml'
 	shell:
 		"""
-		bamCoverage -b {input.bam} -o {output.bigwig} --binSize 50
+		bamCoverage -b {input.bam} -o {output.bigwig} -p {threads}
 		"""
 
 rule multiBwSummary:
@@ -107,11 +107,10 @@ rule plotCorrelation:
 	input:
 		summary="results/multiBigWigSummary_results.npz"
 	output:
-		plot="results/plotCorrelation.png"
-	params:
+		plot="results/plotCorrelation_heatmap.png"
 	conda:
 		'envs/deeptools_env.yml'
 	shell:
 		"""
-		plotCorrelation --corData {input.summary} --plotTitle "Correlation Plot" --whatToPlot heatmap --colorMap RdYlBu --plotNumbers -o {output.plot}
+		plotCorrelation -in {input.summary} -c pearson -p heatmap -o {output.plot}
 		"""
