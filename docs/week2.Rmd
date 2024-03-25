@@ -5,11 +5,14 @@ date: '2024-03-01'
 ---
 
 Use this notebook to quickly write the methods for the week:
-
-
-
+We implemended our analysis using Snakemake. First, raw sequencing reads are aligned to the reference genome using Bowtie2,
+then we did sorting and indexing using samtools. Quality control metric is done using flagstat  which provided alignment efficiency and distribution of reads across genomic features
+After that MultiQC was done which aggregates the quality control metrics from multiple samples into a comprehensive report,which has data quality and consistency. 
+Next we did downstream analysis and visualization where aligned reads are converted to bigWig format using deeptools' bamCoverage utility
+Then multiBigwigSummary was done which computes summary statistics from the bigWig files, while plotCorrelation generates correlation plots to assess the similarity between samples based on signal intensity.
 
 
 
 If asked, you may also include any plots or figures in this notebook as well:
 
+https://github.com/BF528/project-2-sarshiya/blob/main/results/plotCorrelation_heatmap.png
