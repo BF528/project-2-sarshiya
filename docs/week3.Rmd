@@ -5,10 +5,13 @@ date: '2024-03-01'
 ---
 
 Use this notebook to quickly write the methods for the week:
-
-
-
-
+- In the week3 first the tag directory was created using makeTagDirectory from the homer_env.
+- peak calling was used to identify regions of significant enrichment from the aligned ChIP-seq reads.
+- These peaks were then converted to BED format using the pos2bed. 
+- reproducible peaks were identified by taking the intersection of peaks called from two replicate experiments via the bedtools intersect command.
+- to remove potential noise from the analysis, reproducible peaks falling into blacklisted regions were filtered out using the bedtools intersect command with a blacklist file. 
+- annotation of reproducible peaks to their nearest genomic features was performed using the annotatePeaks.pl utility in HOMER. 
+- Finally, motif enrichment analysis was conducted to identify enriched DNA sequence motifs within the reproducible peaks using the findMotifsGenome.pl utility.
 
 
 If asked, you may also include any plots or figures in this notebook as well:
