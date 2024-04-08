@@ -1,18 +1,36 @@
+import pandas
+
+sample_csv = pandas.read_csv('sample_sheet.csv', index_col='name')
+CONDITIONS = set(sample_csv['condition'].tolist())
+REPS = set(sample_csv['replicate'].tolist())
+
 rule all:
 	input:
+		expand("results/{condition}_{replicate}_signal_profile.png", condition=CONDITIONS, replicate=REPS)
 
 rule computeMatrix:
 	input:
+		bigwig="results/{condition}_{replicate}.bw",
+		bed="results/hg38_genes.bed"
 	output:
-	params:
+		"results/{condition}_{replicate}_matrix.txt"
 	conda:
 		'envs/deeptools_env.yml'
-	threads: 4
+	params:
+		padding = 2000
 	shell:
+		"""
+		computeMatrix scale-regions -S {input.bigwig} -R {input.bed} --upstream 2000 --downstream 2000 -o {output}
+		"""
 
 rule plotMatrix:
 	input:
+		matrix=expand("results/{condition}_{replicate}_matrix.txt", condition=CONDITIONS, replicate=REPS)
 	output:
+		"results/{condition}_{replicate}_signal_profile.png"
 	conda:
 		'envs/deeptools_env.yml'
 	shell:
+		"""
+		plotProfile -m {input.matrix} -out {output}
+		"""
