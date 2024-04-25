@@ -8,7 +8,7 @@ rule all:
 	input:
 		expand('results/{condition}_{rep}_fastqc.html', condition=CONDITIONS, rep=REPS),
 		expand('results/{condition}_{rep}.trimmed.fastq.gz', condition=CONDITIONS, rep=REPS),
-		'results/human_genome_index'
+		expand('results/genome_index.{ext}', ext=['1.bt2', '2.bt2', '3.bt2', '4.bt2', 'rev.1.bt2', 'rev.2.bt2'])
 		
 
 rule wget_files:
@@ -23,34 +23,33 @@ rule wget_files:
 		'''
 
 rule bowtie2_build_gencode:
-	input:
-		'results/GRCh38.primary_assembly.genome.fa.gz'
-	output:
-		directory('results/human_genome_index')
-	threads:16
-	conda:
-		'envs/bowtie2_env.yml'
-	shell:
-		"""
-		mkdir -p {output}
-        bowtie2-build --threads {threads} {input} {output}/genome_index
-        touch {output}/genome_index.*
-		"""
+    input:
+        'results/GRCh38.primary_assembly.genome.fa.gz'
+    output:
+        expand('results/genome_index.{ext}', ext=['1.bt2', '2.bt2', '3.bt2', '4.bt2', 'rev.1.bt2', 'rev.2.bt2'])
+    threads: 16
+    conda:
+        'envs/bowtie2_env.yml'
+    shell:
+        """
+        bowtie2-build --threads {threads} {input} results/genome_index &&
+        touch {output}
+        """
 
 rule fastqc:
-	input:
-		expand('samples/{condition}_{rep}.fastq.gz', condition=CONDITIONS, rep=REPS)
-	output:
-		expand('results/{condition}_{rep}_fastqc.html', condition=CONDITIONS, rep=REPS),
-		expand('results/{condition}_{rep}_fastqc.zip', condition=CONDITIONS, rep=REPS)
-	params:
-		outdir = 'results/'
-	conda:
-		'envs/fastqc_env.yml'
-	shell:
-		"""
-		fastqc {input} -o {params.outdir}
-		"""
+    input:
+        'samples/{condition}_{rep}.fastq.gz'
+    output:
+        html='results/{condition}_{rep}_fastqc.html',
+        zip='results/{condition}_{rep}_fastqc.zip'
+    params:
+        outdir='results/'
+    conda:
+        'envs/fastqc_env.yml'
+    shell:
+        """
+        fastqc {input} -o {params.outdir}
+        """
 
 rule trimmomatic:
 	input:
