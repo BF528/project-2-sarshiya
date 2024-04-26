@@ -6,25 +6,21 @@ REPS = set(sample_csv['replicate'].tolist())
 
 
 rule all:
-	input:
-		expand("results/{condition}_{rep}.bam", condition = CONDITIONS, rep = REPS),
-		expand("results/{condition}_{rep}.sorted.bam", condition=CONDITIONS, rep=REPS),
-		expand("results/{condition}_{rep}.sorted.bam.bai", condition=CONDITIONS, rep=REPS),
-		expand("results/{condition}_{rep}.flagstat.txt", condition=CONDITIONS, rep=REPS),
-		expand("results/{condition}_{rep}.bw", condition=CONDITIONS, rep=REPS),
-		"results/multiBigWigSummary_results.npz",
-		"results/multiqc_report.html",
-		"results/plotCorrelation_heatmap.png"
+    input:
+        expand("results/{condition}_{rep}.bam", condition=CONDITIONS, rep=REPS),
+        "results/multiBigWigSummary_results.npz",
+        "results/multiqc_report.html",
+        "results/plotCorrelation_heatmap.png"
 
 rule bowtie2_align:
     input:
-        index="results/human_genome_index/genome_index.1.bt2",
+        index="results/genome_index.1.bt2",
         trimmed_fastq="results/{condition}_{rep}.trimmed.fastq.gz"
     output:
         bam="results/{condition}_{rep}.bam"
     threads: 16
     params:
-        dir = "results/human_genome_index/genome_index"
+        dir = "results/genome_index"
     conda:
         'envs/bowtie2_env.yml'
     shell:
@@ -80,17 +76,19 @@ rule multiqc:
 		"""
 
 rule bamCoverage:
-	input:
-		bam="results/{condition}_{rep}.sorted.bam"
-	output:
-		bigwig="results/{condition}_{rep}.bw"
-	threads: 4
-	conda:
-		'envs/deeptools_env.yml'
-	shell:
-		"""
-		bamCoverage -b {input.bam} -o {output.bigwig} -p {threads}
-		"""
+    input:
+        bam="results/{condition}_{rep}.sorted.bam",
+        bai="results/{condition}_{rep}.sorted.bam.bai"
+    output:
+        bigwig="results/{condition}_{rep}.bw"
+    threads: 4
+    conda:
+        'envs/deeptools_env.yml'
+    shell:
+        """
+        bamCoverage -b {input.bam} -o {output.bigwig} -p {threads}
+        """
+
 
 rule multiBwSummary:
 	input:
