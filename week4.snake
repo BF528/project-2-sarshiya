@@ -6,31 +6,33 @@ REPS = set(sample_csv['replicate'].tolist())
 
 rule all:
 	input:
-		expand("results/{condition}_{replicate}_signal_profile.png", condition=CONDITIONS, replicate=REPS)
+		"results/RUNX1sample_signal_profile.png"
 
 rule computeMatrix:
-	input:
-		bigwig="results/{condition}_{replicate}.bw",
-		bed="results/hg38_genes.bed"
-	output:
-		"results/{condition}_{replicate}_matrix.txt"
-	conda:
-		'envs/deeptools_env.yml'
-	params:
-		padding = 2000
-	shell:
-		"""
-		computeMatrix scale-regions -S {input.bigwig} -R {input.bed} --upstream 2000 --downstream 2000 -o {output}
-		"""
+    input:
+        bigwig=expand("results/RUNX1sample_{replicate}.bw", replicate=REPS),
+        bed="results/hg38_genes.bed"
+    output:
+        "results/RUNX1sample_matrix.txt"
+    conda:
+        'envs/deeptools_env.yml'
+    params:
+        upstream_window = 2000,
+        downstream_window = 2000
+    shell:
+        """
+        computeMatrix scale-regions -S {input.bigwig} -R {input.bed} -out {output} -b 2000 -a 2000
+        """
+
 
 rule plotMatrix:
-	input:
-		matrix=expand("results/{condition}_{replicate}_matrix.txt", condition=CONDITIONS, replicate=REPS)
-	output:
-		"results/{condition}_{replicate}_signal_profile.png"
-	conda:
-		'envs/deeptools_env.yml'
-	shell:
-		"""
-		plotProfile -m {input.matrix} -out {output}
-		"""
+    input:
+        matrix="results/RUNX1sample_matrix.txt",
+    output:
+        "results/RUNX1sample_signal_profile.png"
+    conda:
+        "envs/deeptools_env.yml"
+    shell:
+        """
+        plotProfile -m {input.matrix} --plotType=lines --plotTitle="Signal Profile" --yMin=0 --outFileName {output} 
+        """
