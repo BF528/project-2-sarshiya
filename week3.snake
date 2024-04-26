@@ -22,17 +22,17 @@ rule make_tag_dir:
 		"""
 
 rule findPeaks:
-	input:
-		i1 = expand("results/INPsample_{replicate}_tagDir",replicate=REPS),
-		i2 = expand("results/RUNX1sample_{replicate}_tagDir", replicate=REPS)
-	output:
-		peaks="results/peaks_{replicate}.txt"
-	conda:
-		'envs/homer_env.yml'
-	shell:
-		"""
-		findPeaks {input.i1} -i {input.i2} -o {output.peaks}
-		"""
+    input:
+        RUNX1 = 'results/RUNX1sample_{replicate}_tagDir/',
+        INP = 'results/INPsample_{replicate}_tagDir/'
+    output:
+        peaks = "results/peaks_{replicate}.txt"
+    conda:
+        'envs/homer_env.yml'
+    shell:
+        """
+        findPeaks {input.RUNX1} -i {input.INP} -style factor -o {output.peaks}
+        """
 
 rule convertPeakFiles:
 	input:
@@ -107,14 +107,14 @@ rule unzip_genome:
 		"""
 
 rule motifs:
-	input:
-		peaks="results/filtered_reproducible_peaks.bed",
-		genome="results/unzipped_GRCh38.primary_assembly.genome.fa"
-	output:
-		directory("results/motif_analysis")
-	conda:
-		'envs/homer_env.yml'
-	shell:
-		"""
-		findMotifsGenome.pl {input.peaks} {input.genome} {output}
-		"""
+    input:
+        peaks = "results/filtered_reproducible_peaks.bed",
+        genome = "results/unzipped_GRCh38.primary_assembly.genome.fa"
+    output:
+        directory("results/motif_analysis")
+    conda:
+        'envs/homer_env.yml'
+    shell:
+        """
+        findMotifsGenome.pl {input.peaks} {input.genome} {output} -size 200
+        """
